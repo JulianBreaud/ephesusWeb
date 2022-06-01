@@ -88,7 +88,7 @@ pypi:
 APP_NAME=ephesus
 
 heroku_create:
-	heroku create --ssh-git ${APP_NAME} --region eu
+	heroku create ${APP_NAME} --region eu
 
 heroku_deploy:
 	git push heroku master
