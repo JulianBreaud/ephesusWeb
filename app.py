@@ -1,5 +1,4 @@
 import streamlit as st
-import datetime
 import requests
 from PIL import Image
 from annotated_text import annotated_text

@@ -81,3 +81,15 @@ pypi_test:
 
 pypi:
 	@twine upload dist/* -u $(PYPI_USERNAME)
+
+###### Deployment on Heroku
+
+# app name
+APP_NAME=ephesus-web
+
+heroku_create:
+	heroku create ${APP_NAME} --region eu
+
+heroku_deploy:
+	git push heroku master
+	heroku ps:scale web=1

@@ -1,5 +1,5 @@
 streamlit
-
+st-annotated-text
 
 # packaging
 pip>=9
@@ -24,6 +24,7 @@ gcsfs
 google-cloud-storage
 mlflow
 s3fs
+requests
 
 # utilities
 six>=1.14
