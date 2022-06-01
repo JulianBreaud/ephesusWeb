@@ -85,7 +85,7 @@ pypi:
 ###### Deployment on Heroku
 
 # app name
-APP_NAME=ephesus
+APP_NAME=ephesus-web
 
 heroku_create:
 	heroku create ${APP_NAME} --region eu
