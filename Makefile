@@ -1,8 +1,36 @@
 # ----------------------------------
-#          INSTALL & TEST
+#         LOCAL SET UP
 # ----------------------------------
+
+# install_requirements : dependencies
 install_requirements:
 	@pip install -r requirements.txt
+
+# ----------------------------------
+#         HEROKU COMMANDS
+# ----------------------------------
+
+# streamlit : run the Streamlit web server in order to see what our website looks like
+streamlit:
+	-@streamlit run app.py
+
+# heroku_login : login to Heroku
+heroku_login:
+	-@heroku login
+
+# heroku_create_app : create an app on Heroku for our website
+heroku_create_app:
+	-@heroku create ${APP_NAME}
+
+# deploy_heroku : deploy our app when we are satisfied with its content
+deploy_heroku:
+	-@git push heroku master
+	-@heroku ps:scale web=1
+
+
+# ----------------------------------
+#          INSTALL & TEST
+# ----------------------------------
 
 check_code:
 	@flake8 scripts/* ephesusWeb/*.py
