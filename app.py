@@ -22,8 +22,13 @@ direction = st.sidebar.radio('', ('Projet Ephesus', 'Démo', 'Page3', 'Et pour f
 if direction == 'Projet Ephesus':
 
 
-    html_code = '<iframe width="100%" height="550" scrolling="yes" frameborder="no" src="https://geoffroygit.github.io/ephesus/notebooks/Ephesus.slides.html"></iframe>'
-    components.html(html_code, height = 550)
+    html_code = '''
+        <a target="_blank" href="https://geoffroygit.github.io/ephesus/notebooks/Ephesus.slides.html">
+        <img src="https://raw.githubusercontent.com/JulianBreaud/ephesusWeb/master/images/fullscreen.png" /></a>
+        <iframe width="100%" height="550" scrolling="yes" frameborder="no"
+        allowfullscreen src="https://geoffroygit.github.io/ephesus/notebooks/Ephesus.slides.html"></iframe>
+            '''
+    components.html(html_code, height = 600)
 
 # PAGE 2 - Présentation du projet Ephesus
 elif direction == 'Démo':
