@@ -2,38 +2,33 @@ import streamlit as st
 import requests
 from PIL import Image
 from annotated_text import annotated_text
+import streamlit.components.v1 as components
 
 st.set_page_config(
             page_title="Projet Ephesus", # => Quick reference - Streamlit
-            page_icon="🐍",
-            layout="centered", # wide
+            page_icon="",#"🐍",
+            layout="wide",
             initial_sidebar_state="auto") # collapsed
 
 # SIDEBAR
 
 image = Image.open('images/wagon.png')
 st.sidebar.image(image, caption='Le Wagon', use_column_width=False)
-st.sidebar.markdown(f"""
-    # Navigation
-    """)
+st.sidebar.markdown("")
 
-direction = st.sidebar.radio('Aller à', ('Présentation du projet Ephesus', 'Démo', 'Page3', 'Et pour finir'))
+direction = st.sidebar.radio('', ('Projet Ephesus', 'Démo', 'Page3', 'Et pour finir'))
 
 # PAGE 1 - Présentation du projet Ephesus
-if direction == 'Présentation du projet Ephesus':
-    st.markdown("""
-    # Projet EPHESUS
+if direction == 'Projet Ephesus':
 
-    ## Interpréter les données textuelles générées par des mémos vocaux.
 
-    Les infirmières lors de visite d’un patient, prennent une photo de la prescription médicale et
-    réalisent un mémo vocal décrivant les tâches à effectuer. Ces informations sont ensuite
-    saisies par des facturières qui réalisent toute la gestion du cabinet (télétransmission,
-    compta). L’objectif est de préremplir les données d’une prescription afin que les facturières
-    augmentent en productivité et puissent se concentrent sur la partie à forte valeur ajoutée et
-    plus complexe.
-
-    """)
+    html_code = '''
+        <a target="_blank" href="https://geoffroygit.github.io/ephesus/notebooks/Ephesus.slides.html">
+        <img src="https://raw.githubusercontent.com/JulianBreaud/ephesusWeb/master/images/fullscreen.png" /></a>
+        <iframe width="100%" height="550" scrolling="yes" frameborder="no"
+        allowfullscreen src="https://geoffroygit.github.io/ephesus/notebooks/Ephesus.slides.html"></iframe>
+            '''
+    components.html(html_code, height = 600)
 
 # PAGE 2 - Présentation du projet Ephesus
 elif direction == 'Démo':
