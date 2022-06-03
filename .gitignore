@@ -10,3 +10,5 @@ raw_data/
 .python-version
 **/.vscode/*
 *.ipynb_*
+
+models/*

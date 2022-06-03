@@ -1,5 +1,7 @@
 streamlit
 st-annotated-text
+spacy
+spacy_streamlit
 
 # packaging
 pip>=9
