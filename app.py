@@ -58,7 +58,8 @@ elif direction == 'Démo':
     st.markdown("""
         ### Partie 2 - Le mémo est transcrit :
     """)
-    translation = st.text(texte_enregistre)
+    st.text(texte_enregistre)
+    translation = texte_enregistre
 
     # la partie - Translation du mémo
     st.markdown("""
