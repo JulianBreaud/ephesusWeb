@@ -12,3 +12,4 @@ raw_data/
 *.ipynb_*
 
 models/*
+audio/

@@ -54,7 +54,11 @@ elif direction == 'Démo':
         ### Partie 1 - Réalisation d'un mémo vocal par une infirmière :
     """)
 
-    st.write("Intégrer le son d'un mémo")
+    st.write("Traitement : Prise de sang")
+
+    audio_file = open('audio/Prise_de_sang.m4a', 'rb')
+    audio_bytes = audio_file.read()
+    st.audio(audio_bytes, format='audio/ogg')
 
     #if st.button("Lancer la transcription"):
         # print is visible in the server output, not in the page
@@ -65,7 +69,7 @@ elif direction == 'Démo':
     st.markdown("""
         ### Partie 2 - Transcription du mémo :
     """)
-    text = st.text_area("", "prise de sang effectuée au cabinet 12/02/2020.")
+    text = st.text_area("", "Prise de sang à domicile le samedi 26 février à 8h15 par amandine.")
 
     # la partie - Translation du mémo
     st.markdown("""
