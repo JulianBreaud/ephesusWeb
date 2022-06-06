@@ -1,6 +1,12 @@
+
+####################################################################
+### IMPORTS
+####################################################################
+
 from re import S
 import streamlit as st
 import numpy as np
+import pandas as pd
 import requests
 from PIL import Image
 from annotated_text import annotated_text
@@ -14,14 +20,16 @@ from os.path import isfile, join
 import spacy
 from spacy_streamlit import visualize, visualize_ner, visualize_textcat, visualize_tokens, process_text
 
+####################################################################
+### SIDEBAR & CONFIG
+####################################################################
 
 st.set_page_config(
             page_title="Projet Ephesus", # => Quick reference - Streamlit
-            page_icon="",#"🐍",
+            page_icon="",#on a choisi le logo standard mais on peut mettre au chose "🐍",
             layout="wide",
             initial_sidebar_state="auto") # collapsed
 
-# SIDEBAR
 
 image = Image.open('images/wagon.png')
 st.sidebar.image(image, caption='Le Wagon', use_column_width=False)
@@ -29,7 +37,10 @@ st.sidebar.markdown("")
 
 direction = st.sidebar.radio('', ('Projet Ephesus', 'Démo', 'Run', 'Et pour finir'))
 
-# PAGE 1 - Présentation du projet Ephesus
+####################################################################
+### PAGE 1 - Présentation du projet Ephesus
+####################################################################
+
 if direction == 'Projet Ephesus':
 
 
@@ -41,7 +52,10 @@ if direction == 'Projet Ephesus':
             '''
     components.html(html_code, height = 600)
 
-# PAGE 2 - DEMO
+####################################################################
+### PAGE 2 - DEMO
+####################################################################
+
 elif direction == 'Démo':
 
     st.markdown("""
@@ -49,79 +63,108 @@ elif direction == 'Démo':
 
     """)
 
-    # la partie - Son du Mémo
+    # Son du Mémo
     st.markdown("""
-        ### Partie 1 - Réalisation d'un mémo vocal par une infirmière :
+        ### Réalisation d'un mémo vocal par une infirmière :
     """)
-
-    st.write("Traitement : Prise de sang")
-
+    st.write("")
     audio_file = open('audio/Prise_de_sang.m4a', 'rb')
     audio_bytes = audio_file.read()
     st.audio(audio_bytes, format='audio/ogg')
 
-    #if st.button("Lancer la transcription"):
-        # print is visible in the server output, not in the page
-    #    print('button clicked!')
-    #    st.write('transcription lancée 🎉')
-
-    # la partie - Translation du mémo
+    # Translation du mémo
     st.markdown("""
-        ### Partie 2 - Transcription du mémo :
+        ### Transcription du mémo :
     """)
     text = st.text_area("", "Prise de sang à domicile le samedi 26 février à 8h15 par amandine.")
 
-    # la partie - Translation du mémo
+    # identification des labels
     st.markdown("""
-        ### Partie 3 - Analyse :
+        ### Analyse :
     """)
 
-    nlp = spacy.load("models/model_v2/model-best")
+    nlp = spacy.load("models/model_full/model-best")
     doc = nlp(text)
     visualize_ner(doc, labels=nlp.get_pipe("ner").labels,
     show_table = False,
     title = "",
-    # sidebar_title = "Selection variables",
     colors = {
-        "Treatement" : "#304D63",
+        "Treatment" : "#99CCFF",
         "Cotation" : "#444444", #hors palette
         "Date" : "#B2E7E8",
         "Time" : "#8FB9AA",
         "Duration" : "#F2D096",
         "Frequency" : "#ED895",
-        "Location" : "#FF5700", #hors palette
+        "Location" : "#FFCC99", #hors palette
         }
         )
 
+    # Codage des labels
+    st.markdown("""
+        ### Traitement :
+    """)
+
+    liste = []
+    for index, ent in enumerate(doc.ents):
+        liste.append((str(doc.ents[index]), ent.label_))
+
     # url de l'api
-    url = 'https://ephesus-api-3d2vvkkptq-ew.a.run.app/test'
+    url = 'https://ephesus-api-3d2vvkkptq-ew.a.run.app/'
 
-    translation = "Un grand pansement à domicile à partir du 3 juin, tournée 2 , tous les deux jours pendant 3 semaines, 10 Km aller/retour IK montagne , en ald."
-
-    params = {
-        "sentence" : translation
+    endpoints = {
+        "Treatment" : "treatment",
+        "Date" : "date",
+        "Time" : "time",
+        "Location" : "location",
         }
 
-    # retrieve the response
-    response = requests.get(
-        url,
-        params=params
-    )
+    st.write("Nombre d'éléments détectés : " + str(len(liste)))
 
-    st.markdown("""
-                ### A SUPPRIMER - pour l'appel API
-                """)
+    for item in liste:
+        if item[1] in endpoints:
+            url_full = url + endpoints[item[1]]
 
-    if response.status_code == 200:
-        response_api = response.json().get("entities", "not found")
-        response_api = tuple(tuple(i) if type(i)==type([]) else i for i in response_api)
-        annotated_text(*response_api)
+        st.write(item[1] + " : " + item[0])
 
-    else:
-        st.error('Sorry ...')
+        params = {
+            "sentence" : item[0]
+            }
+
+        # retrieve the response
+        response = requests.get(
+            url_full,
+            params=params
+        )
 
 
-# PAGE 3 - on importe l'ensemble des translations et on lance le modèle et on obtient un rapport d'éxécution
+
+        if response.status_code == 200:
+            response_api = response.json()
+
+            df = pd.DataFrame(data = [response_api.values()],
+                columns=response_api.keys()
+                )
+
+            # CSS to inject contained in a string
+            hide_dataframe_row_index = """
+                        <style>
+                            .row_heading.level0 {display:none}
+                            .blank {display:none}
+                        </style>
+                        """
+
+            # Inject CSS with Markdown
+            st.markdown(hide_dataframe_row_index, unsafe_allow_html=True)
+
+            st.dataframe(df)
+#
+
+
+####################################################################
+### PAGE 3 - RUN
+### on importe l'ensemble des translations et on lance le modèle et on obtient un rapport d'éxécution
+####################################################################
+
 elif direction == 'Run':
 
     st.markdown("""
@@ -199,13 +242,17 @@ elif direction == 'Run':
             st.markdown("""
                         ### Partie 4 - Le rapport d'exécution :
                         """)
+
             col1, col2 = st.columns(2)
             col1.metric("Nombre de documents lus", len(data), "")
             col2.metric("Taux de reconnaissances", "80%", "")
 
             # rapport d’exécution : le nombre de rejet, taux de détections, de reconnaissance
 
-# PAGE 4 - FIN
+####################################################################
+### PAGE 4 - FIN
+####################################################################
+
 else:
     '''
     # Merci pour votre écoute.
