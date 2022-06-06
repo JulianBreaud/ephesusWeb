@@ -1,3 +1,4 @@
+from re import S
 import streamlit as st
 import numpy as np
 import requests
@@ -9,6 +10,9 @@ import os
 import json
 from os import listdir
 from os.path import isfile, join
+
+import spacy
+from spacy_streamlit import visualize, visualize_ner, visualize_textcat, visualize_tokens, process_text
 
 
 st.set_page_config(
@@ -37,7 +41,7 @@ if direction == 'Projet Ephesus':
             '''
     components.html(html_code, height = 600)
 
-# PAGE 2 - Présentation du projet Ephesus
+# PAGE 2 - DEMO
 elif direction == 'Démo':
 
     st.markdown("""
@@ -47,56 +51,74 @@ elif direction == 'Démo':
 
     # la partie - Son du Mémo
     st.markdown("""
-        ### Partie 1 - Une infirmière enregistre un mémo :
+        ### Partie 1 - Réalisation d'un mémo vocal par une infirmière :
     """)
 
-    st.write("Intégrer le son d'un mémo")
+    st.write("Traitement : Prise de sang")
 
-    texte_enregistre = "Un grand pansement à domicile à partir du 3 juin, tournée 2 , tous les deux jours pendant 3 semaines, 10 Km aller/retour IK montagne , en ald."
+    audio_file = open('audio/Prise_de_sang.m4a', 'rb')
+    audio_bytes = audio_file.read()
+    st.audio(audio_bytes, format='audio/ogg')
 
-    # la partie - Translation du mémo
-    st.markdown("""
-        ### Partie 2 - Le mémo est transcrit :
-    """)
-    translation = st.text(texte_enregistre)
-
-    # la partie - Translation du mémo
-    st.markdown("""
-        ### Partie 3 - Lancement de l'analyse :
-    """)
-
-    if st.button("GO"):
+    #if st.button("Lancer la transcription"):
         # print is visible in the server output, not in the page
-        print('button clicked!')
-        st.write('Analyse lancée 🎉')
+    #    print('button clicked!')
+    #    st.write('transcription lancée 🎉')
 
-        # url de l'api
-        url = 'https://ephesus-api-3d2vvkkptq-ew.a.run.app/test'
+    # la partie - Translation du mémo
+    st.markdown("""
+        ### Partie 2 - Transcription du mémo :
+    """)
+    text = st.text_area("", "Prise de sang à domicile le samedi 26 février à 8h15 par amandine.")
 
-        params = {
-            "sentence" : translation
-            }
+    # la partie - Translation du mémo
+    st.markdown("""
+        ### Partie 3 - Analyse :
+    """)
 
-        # retrieve the response
-        response = requests.get(
-            url,
-            params=params
+    nlp = spacy.load("models/model_v2/model-best")
+    doc = nlp(text)
+    visualize_ner(doc, labels=nlp.get_pipe("ner").labels,
+    show_table = False,
+    title = "",
+    # sidebar_title = "Selection variables",
+    colors = {
+        "Treatement" : "#304D63",
+        "Cotation" : "#444444", #hors palette
+        "Date" : "#B2E7E8",
+        "Time" : "#8FB9AA",
+        "Duration" : "#F2D096",
+        "Frequency" : "#ED895",
+        "Location" : "#FF5700", #hors palette
+        }
         )
 
-        st.markdown("""
-                    ### Partie 4 - Le résultat :
-                    """)
+    # url de l'api
+    url = 'https://ephesus-api-3d2vvkkptq-ew.a.run.app/test'
 
-        if response.status_code == 200:
-            response_api = response.json().get("entities", "not found")
-            response_api = tuple(tuple(i) if type(i)==type([]) else i for i in response_api)
-            annotated_text(*response_api)
+    translation = "Un grand pansement à domicile à partir du 3 juin, tournée 2 , tous les deux jours pendant 3 semaines, 10 Km aller/retour IK montagne , en ald."
 
-        else:
-            st.error('Sorry ...')
+    params = {
+        "sentence" : translation
+        }
+
+    # retrieve the response
+    response = requests.get(
+        url,
+        params=params
+    )
+
+    st.markdown("""
+                ### A SUPPRIMER - pour l'appel API
+                """)
+
+    if response.status_code == 200:
+        response_api = response.json().get("entities", "not found")
+        response_api = tuple(tuple(i) if type(i)==type([]) else i for i in response_api)
+        annotated_text(*response_api)
 
     else:
-        st.write('Analyse non lancée 😞')
+        st.error('Sorry ...')
 
 
 # PAGE 3 - on importe l'ensemble des translations et on lance le modèle et on obtient un rapport d'éxécution
@@ -107,7 +129,6 @@ elif direction == 'Run':
 
     """)
 
-    # la partie - Son du Mémo
     st.markdown("""
         ### Partie 1 - Récupération des mémos retranscrits :
     """)
