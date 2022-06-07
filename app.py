@@ -39,7 +39,7 @@ image = Image.open('images/medical.png')
 st.sidebar.image(image, caption="", use_column_width=False)
 st.sidebar.markdown("")
 
-pages = ('Projet Ephesus', 'Démo', 'Run', 'Et pour finir')
+pages = ('Projet Ephesus', 'Démo')#('Projet Ephesus', 'Démo', 'Run', 'Et pour finir')
 direction = st.sidebar.radio('', pages)
 
 ####################################################################
@@ -47,7 +47,6 @@ direction = st.sidebar.radio('', pages)
 ####################################################################
 
 if direction == pages[0]:
-
     presentation0 = Image.open('images/PresentationPage0.PNG')
     presentation1 = Image.open('images/PresentationPage1.PNG')
     presentation2 = Image.open('images/PresentationPage2.PNG')
@@ -97,6 +96,7 @@ elif direction == pages[1]:
         st.session_state.button_audio2text_pressed = False
 
     def run_models(text):
+        st.markdown("### Automatisation de l'analyse du texte")
 
         # api url
         api_base_url = "https://ephesus-api-3d2vvkkptq-ew.a.run.app/"
@@ -192,101 +192,101 @@ elif direction == pages[1]:
         run_transcription()
 
 
-####################################################################
-### PAGE 3 - RUN
-### on importe l'ensemble des translations et on lance le modèle et on obtient un rapport d'éxécution
-####################################################################
+# ####################################################################
+# ### PAGE 3 - RUN
+# ### on importe l'ensemble des translations et on lance le modèle et on obtient un rapport d'éxécution
+# ####################################################################
 
-elif direction == pages[2]:
+# elif direction == pages[2]:
 
-    st.markdown("""
-    # Récupération de plusieurs mémos
+#     st.markdown("""
+#     # Récupération de plusieurs mémos
 
-    """)
+#     """)
 
-    st.markdown("""
-        ### Partie 1 - Récupération des mémos retranscrits :
-    """)
+#     st.markdown("""
+#         ### Partie 1 - Récupération des mémos retranscrits :
+#     """)
 
-    rep = st.text_input('Les memos sont dans le repertoire :', "raw_data/input_json")
+#     rep = st.text_input('Les memos sont dans le repertoire :', "raw_data/input_json")
 
-    LOCAL_PATH =str(rep)
+#     LOCAL_PATH =str(rep)
 
-    # récupération des noms des fichiers output translation des memos vocaux
-    fichiers = [fichier for fichier in listdir(LOCAL_PATH) if isfile(join(LOCAL_PATH, fichier))]
+#     # récupération des noms des fichiers output translation des memos vocaux
+#     fichiers = [fichier for fichier in listdir(LOCAL_PATH) if isfile(join(LOCAL_PATH, fichier))]
 
-    data = []
-    for fichier in fichiers :
-        lib_fichier = LOCAL_PATH + "/" + fichier
-        with open(lib_fichier) as mon_fichier:
-            data.append(json.load(mon_fichier))
+#     data = []
+#     for fichier in fichiers :
+#         lib_fichier = LOCAL_PATH + "/" + fichier
+#         with open(lib_fichier) as mon_fichier:
+#             data.append(json.load(mon_fichier))
 
-    # récupération seulement de la phrase = sentence du mémo
-    data = [data[i]["Translation"] for i in range(len(data))]
+#     # récupération seulement de la phrase = sentence du mémo
+#     data = [data[i]["Translation"] for i in range(len(data))]
 
-    # on écrit une ligne vide pour la présentation
-    st.write("")
+#     # on écrit une ligne vide pour la présentation
+#     st.write("")
 
-    if len(data) > 1 :
-        st.write(f"{len(data)} translations trouvées : ")
-    else :
-        st.write(f"{len(data)} translation trouvée : ")
+#     if len(data) > 1 :
+#         st.write(f"{len(data)} translations trouvées : ")
+#     else :
+#         st.write(f"{len(data)} translation trouvée : ")
 
-    for i in range(len(data)) :
-        st.write(data[i])
+#     for i in range(len(data)) :
+#         st.write(data[i])
 
-    st.markdown("""
-        ### Partie 2 - Lancement de l'analyse :
-    """)
-    if st.button("GO"):
-            # print is visible in the server output, not in the page
-            print('button clicked!')
-            st.write('Analyse lancée 🎉')
+#     st.markdown("""
+#         ### Partie 2 - Lancement de l'analyse :
+#     """)
+#     if st.button("GO"):
+#             # print is visible in the server output, not in the page
+#             print('button clicked!')
+#             st.write('Analyse lancée 🎉')
 
-            # url de l'api
-            url = 'https://ephesus-api-3d2vvkkptq-ew.a.run.app/test'
+#             # url de l'api
+#             url = 'https://ephesus-api-3d2vvkkptq-ew.a.run.app/test'
 
-            st.markdown("""
-                            ### Partie 3 - Les résultats :
-                            """)
+#             st.markdown("""
+#                             ### Partie 3 - Les résultats :
+#                             """)
 
-            for i in range(len(data)) :
+#             for i in range(len(data)) :
 
-                params = {
-                    "sentence" : data[i]
-                    }
+#                 params = {
+#                     "sentence" : data[i]
+#                     }
 
-                # retrieve the response
-                response = requests.get(
-                    url,
-                    params=params
-                )
+#                 # retrieve the response
+#                 response = requests.get(
+#                     url,
+#                     params=params
+#                 )
 
-                st.write('Phrase ' + str(i) + " :")
+#                 st.write('Phrase ' + str(i) + " :")
 
-                if response.status_code == 200:
-                    response_api = response.json().get("entities", "not found")
-                    response_api = tuple(tuple(i) if type(i)==type([]) else i for i in response_api)
-                    annotated_text(*response_api)
+#                 if response.status_code == 200:
+#                     response_api = response.json().get("entities", "not found")
+#                     response_api = tuple(tuple(i) if type(i)==type([]) else i for i in response_api)
+#                     annotated_text(*response_api)
 
-                st.write("")
+#                 st.write("")
 
-            st.markdown("""
-                        ### Partie 4 - Le rapport d'exécution :
-                        """)
+#             st.markdown("""
+#                         ### Partie 4 - Le rapport d'exécution :
+#                         """)
 
-            col1, col2 = st.columns(2)
-            col1.metric("Nombre de documents lus", len(data), "")
-            col2.metric("Taux de reconnaissances", "80%", "")
+#             col1, col2 = st.columns(2)
+#             col1.metric("Nombre de documents lus", len(data), "")
+#             col2.metric("Taux de reconnaissances", "80%", "")
 
-            # rapport d’exécution : le nombre de rejet, taux de détections, de reconnaissance
+#             # rapport d’exécution : le nombre de rejet, taux de détections, de reconnaissance
 
-####################################################################
-### PAGE 4 - FIN
-####################################################################
+# ####################################################################
+# ### PAGE 4 - FIN
+# ####################################################################
 
-else:
-    '''
-    # Merci pour votre écoute.
-    # Avez-vous des questions ?
-    '''
+# else:
+#     '''
+#     # Merci pour votre écoute.
+#     # Avez-vous des questions ?
+#     '''
