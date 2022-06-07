@@ -47,14 +47,40 @@ direction = st.sidebar.radio('', pages)
 ####################################################################
 
 if direction == pages[0]:
+  
+    presentation1 = Image.open('images/PresentationPage1.PNG')
+    presentation2 = Image.open('images/PresentationPage2.PNG')
+    presentation3 = Image.open('images/PresentationPage3.PNG')
 
-    html_code = '''
-        <a target="_blank" href="https://geoffroygit.github.io/ephesus/notebooks/Ephesus.slides.html">
-        <img src="https://raw.githubusercontent.com/JulianBreaud/ephesusWeb/master/images/fullscreen.png" /></a>
-        <iframe width="100%" height="550" scrolling="yes" frameborder="no"
-        allowfullscreen src="https://geoffroygit.github.io/ephesus/notebooks/Ephesus.slides.html"></iframe>
-            '''
-    components.html(html_code, height = 600)
+    if "persisted_variable" not in st.session_state:
+        st.session_state.persisted_variable = 0
+
+    columns_Page = st.columns(7)
+    if columns_Page[6].button("▶️"):
+        st.session_state.persisted_variable += 1
+
+    if columns_Page[0].button("◀️"):
+        st.session_state.persisted_variable -= 1
+
+    # st.session_state.persisted_variable
+
+    if st.session_state.persisted_variable == 0:
+        st.image(presentation1, use_column_width=True)
+
+    if st.session_state.persisted_variable == 1 :
+        st.image(presentation2, use_column_width=True)
+
+    if st.session_state.persisted_variable == 2 :
+        st.image(presentation3, use_column_width=True)
+
+
+    # html_code = '''
+    #    <a target="_blank" href="https://geoffroygit.github.io/ephesus/notebooks/Ephesus.slides.html">
+    #    <img src="https://raw.githubusercontent.com/JulianBreaud/ephesusWeb/master/images/fullscreen.png" /></a>
+    #    <iframe width="100%" height="550" scrolling="yes" frameborder="no"
+    #    allowfullscreen src="https://geoffroygit.github.io/ephesus/notebooks/Ephesus.slides.html"></iframe>
+    #        '''
+    # components.html(html_code, height = 600)
 
 ####################################################################
 ### PAGE 2 - DEMO
