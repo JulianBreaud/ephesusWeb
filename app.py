@@ -20,6 +20,10 @@ from os.path import isfile, join
 import spacy
 from spacy_streamlit import visualize, visualize_ner, visualize_textcat, visualize_tokens, process_text
 
+from spacy.vocab import Vocab
+from spacy.tokens import Doc
+import base64
+
 ####################################################################
 ### SIDEBAR & CONFIG
 ####################################################################
@@ -83,9 +87,28 @@ elif direction == 'Démo':
         ### Analyse :
     """)
 
-    nlp = spacy.load("models/model_full/model-best")
-    doc = nlp(text)
-    visualize_ner(doc, labels=nlp.get_pipe("ner").labels,
+    #----------------------------------------------------#
+    #nlp = spacy.load("models/model_full/model-best")
+    #doc = nlp(text)
+    # replace the two lines of code above by an API call:
+    predict_url = "https://ephesus-api-3d2vvkkptq-ew.a.run.app/predict"
+    predict_params = {"sentence" : text}
+    predict_response = requests.get(predict_url, params=predict_params)
+    if predict_response.status_code == 200:
+        predict_response = predict_response.json()
+    else:
+        predict_response = {} # (we need to better handle the errors)
+    # create Doc() object from vocab bytes and doc bytes
+    labels = predict_response["labels"]
+    doc_bytes = base64.b64decode(predict_response["doc"])
+    vocab_bytes = base64.b64decode(predict_response["vocab"])
+    vocab = Vocab()
+    vocab.from_bytes(vocab_bytes)
+    doc = Doc(vocab).from_bytes(doc_bytes)
+    #----------------------------------------------------#
+
+
+    visualize_ner(doc, labels=labels,
     show_table = False,
     title = "",
     colors = {
