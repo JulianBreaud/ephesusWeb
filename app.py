@@ -35,18 +35,19 @@ st.set_page_config(
             initial_sidebar_state="auto") # collapsed
 
 
-image = Image.open('images/wagon.png')
-st.sidebar.image(image, caption='Le Wagon', use_column_width=False)
+image = Image.open('images/medical.png')
+st.sidebar.image(image, caption="", use_column_width=False)
 st.sidebar.markdown("")
 
-direction = st.sidebar.radio('', ('Projet Ephesus', 'Démo', 'Run', 'Et pour finir'))
+pages = ('Projet Ephesus', 'Démo', 'Run', 'Et pour finir')
+direction = st.sidebar.radio('', pages)
 
 ####################################################################
 ### PAGE 1 - Présentation du projet Ephesus
 ####################################################################
 
-if direction == 'Projet Ephesus':
-
+if direction == pages[0]:
+  
     presentation1 = Image.open('images/PresentationPage1.PNG')
     presentation2 = Image.open('images/PresentationPage2.PNG')
     presentation3 = Image.open('images/PresentationPage3.PNG')
@@ -85,127 +86,106 @@ if direction == 'Projet Ephesus':
 ### PAGE 2 - DEMO
 ####################################################################
 
-elif direction == 'Démo':
+elif direction == pages[1]:
 
-    st.markdown("""
-    # Démo
+    # initialise session state
+    if "button_audio2text_pressed" not in st.session_state:
+        st.session_state.button_audio2text_pressed = False
 
-    """)
+    def run_models(text):
+
+        # api url
+        api_base_url = "https://ephesus-api-3d2vvkkptq-ew.a.run.app/"
+
+        colors = {
+                "Treatment" : "#99CCFF",
+                "Cotation" : "#444444", #hors palette
+                "Date" : "#B2E7E8",
+                "Time" : "#8FB9AA",
+                "Duration" : "#F2D096",
+                "Frequency" : "#ED895",
+                "Location" : "#FFCC99", #hors palette
+                }
+
+        # identify entities
+        predict_url = api_base_url + "predict"
+        predict_params = {"sentence" : text}
+        predict_response = requests.get(predict_url, params=predict_params)
+        if predict_response.status_code == 200:
+            predict_response = predict_response.json()
+        else:
+            predict_response = {} # (we need to better handle the errors)
+        # create Doc() object from vocab bytes and doc bytes
+        labels = predict_response["labels"]
+        doc_bytes = base64.b64decode(predict_response["doc"])
+        vocab_bytes = base64.b64decode(predict_response["vocab"])
+        vocab = Vocab()
+        vocab.from_bytes(vocab_bytes)
+        doc = Doc(vocab).from_bytes(doc_bytes)
+
+        # show entities on screen
+        visualize_ner(doc, labels=labels,
+                    show_table = False,
+                    title = "",
+                    colors = colors)
+
+        # feed entities to the models for treatment, date, time, location
+        # list entities
+        entities = [(str(ent), ent.label_) for ent in doc.ents]
+
+        endpoints = {
+            "Treatment" : "treatment",
+            "Date" : "date",
+            "Time" : "time",
+            "Location" : "location",
+            }
+
+        columns_models = st.columns(len(entities))
+
+        for i, item in enumerate(entities):
+            if item[1] in endpoints:
+                url_full = api_base_url + endpoints[item[1]]
+            params = {"sentence" : item[0]}
+            # api call
+            response = requests.get(url_full, params=params)
+            if response.status_code == 200:
+                response_api = response.json()
+
+                # show api response on screen
+                #columns_models[i].markdown(f"#### {item[1]}")
+                #columns_models[i].markdown(f"##### {item[0]}")
+                color = colors[item[1]]
+                for key, val in response_api.items():
+                    columns_models[i].markdown(
+                        f'<p style="background-color: {color}">{key} : {val}</p>',
+                        unsafe_allow_html=True)
+
+    def run_transcription():
+        # Text of the memo (can be changed by the user)
+        text = st.text_area("", memo)
+        # run the models
+        run_models(text)
 
     # Son du Mémo
     st.markdown("""
-        ### Réalisation d'un mémo vocal par une infirmière :
+        ### Réalisation d'un mémo vocal par le personnel soignant
     """)
-    st.write("")
+    # create columns to put the audio and the button side by side
+    columns = st.columns(2)
+    # load audio file
     audio_file = open('audio/Prise_de_sang.m4a', 'rb')
     audio_bytes = audio_file.read()
-    st.audio(audio_bytes, format='audio/ogg')
+    columns[0].audio(audio_bytes, format='audio/ogg')
+    # text transcript
+    memo = "Prise de sang à domicile le samedi 26 février à 8h15 par Amandine."
 
-    # Translation du mémo
-    st.markdown("""
-        ### Transcription du mémo :
-    """)
-    text = st.text_area("", "Prise de sang à domicile le samedi 26 février à 8h15 par amandine.")
-
-    # identification des labels
-    st.markdown("""
-        ### Analyse :
-    """)
-
-    #----------------------------------------------------#
-    #nlp = spacy.load("models/model_full/model-best")
-    #doc = nlp(text)
-    # replace the two lines of code above by an API call:
-    predict_url = "https://ephesus-api-3d2vvkkptq-ew.a.run.app/predict"
-    predict_params = {"sentence" : text}
-    predict_response = requests.get(predict_url, params=predict_params)
-    if predict_response.status_code == 200:
-        predict_response = predict_response.json()
+    if not st.session_state.button_audio2text_pressed:
+        # show button transcription
+        if columns[1].button("Transcription du mémo"):
+            st.session_state.button_audio2text_pressed = True
+            run_transcription()
     else:
-        predict_response = {} # (we need to better handle the errors)
-    # create Doc() object from vocab bytes and doc bytes
-    labels = predict_response["labels"]
-    doc_bytes = base64.b64decode(predict_response["doc"])
-    vocab_bytes = base64.b64decode(predict_response["vocab"])
-    vocab = Vocab()
-    vocab.from_bytes(vocab_bytes)
-    doc = Doc(vocab).from_bytes(doc_bytes)
-    #----------------------------------------------------#
-
-
-    visualize_ner(doc, labels=labels,
-    show_table = False,
-    title = "",
-    colors = {
-        "Treatment" : "#99CCFF",
-        "Cotation" : "#444444", #hors palette
-        "Date" : "#B2E7E8",
-        "Time" : "#8FB9AA",
-        "Duration" : "#F2D096",
-        "Frequency" : "#ED895",
-        "Location" : "#FFCC99", #hors palette
-        }
-        )
-
-    # Codage des labels
-    st.markdown("""
-        ### Traitement :
-    """)
-
-    liste = []
-    for index, ent in enumerate(doc.ents):
-        liste.append((str(doc.ents[index]), ent.label_))
-
-    # url de l'api
-    url = 'https://ephesus-api-3d2vvkkptq-ew.a.run.app/'
-
-    endpoints = {
-        "Treatment" : "treatment",
-        "Date" : "date",
-        "Time" : "time",
-        "Location" : "location",
-        }
-
-    st.write("Nombre d'éléments détectés : " + str(len(liste)))
-
-    for item in liste:
-        if item[1] in endpoints:
-            url_full = url + endpoints[item[1]]
-
-        st.write(item[1] + " : " + item[0])
-
-        params = {
-            "sentence" : item[0]
-            }
-
-        # retrieve the response
-        response = requests.get(
-            url_full,
-            params=params
-        )
-
-
-
-        if response.status_code == 200:
-            response_api = response.json()
-
-            df = pd.DataFrame(data = [response_api.values()],
-                columns=response_api.keys()
-                )
-
-            # CSS to inject contained in a string
-            hide_dataframe_row_index = """
-                        <style>
-                            .row_heading.level0 {display:none}
-                            .blank {display:none}
-                        </style>
-                        """
-
-            # Inject CSS with Markdown
-            st.markdown(hide_dataframe_row_index, unsafe_allow_html=True)
-
-            st.dataframe(df)
-#
+        run_transcription()
 
 
 ####################################################################
@@ -213,7 +193,7 @@ elif direction == 'Démo':
 ### on importe l'ensemble des translations et on lance le modèle et on obtient un rapport d'éxécution
 ####################################################################
 
-elif direction == 'Run':
+elif direction == pages[2]:
 
     st.markdown("""
     # Récupération de plusieurs mémos
