@@ -93,6 +93,7 @@ elif direction == pages[1]:
         st.session_state.button_audio2text_pressed = False
 
     def run_models(text):
+        st.markdown("### Automatisation de l'analyse du texte")
 
         # api url
         api_base_url = "https://ephesus-api-3d2vvkkptq-ew.a.run.app/"
