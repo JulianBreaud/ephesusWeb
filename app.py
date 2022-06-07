@@ -94,8 +94,19 @@ elif direction == pages[1]:
     # initialise session state
     if "button_audio2text_pressed" not in st.session_state:
         st.session_state.button_audio2text_pressed = False
+    if "api_is_online" not in st.session_state:
+        error_free = True # we assume the api is online
+        st.session_state.api_is_online = error_free
 
     def run_models(text):
+        '''
+        return True is all is well
+        return False if there's an error with api calls
+        '''
+
+        if not st.session_state.api_is_online:
+            return False
+
         st.markdown("### Automatisation de l'analyse du texte")
 
         # api url
@@ -118,7 +129,10 @@ elif direction == pages[1]:
         if predict_response.status_code == 200:
             predict_response = predict_response.json()
         else:
-            predict_response = {} # (we need to better handle the errors)
+            # error: most likely the api is offline
+            st.session_state.api_is_online = False
+            return False
+
         # create Doc() object from vocab bytes and doc bytes
         labels = predict_response["labels"]
         doc_bytes = base64.b64decode(predict_response["doc"])
@@ -163,12 +177,16 @@ elif direction == pages[1]:
                     columns_models[i].markdown(
                         f'<p style="background-color: {color}">{key} : {val}</p>',
                         unsafe_allow_html=True)
+            else:
+                st.session_state.api_is_online = False
+                return False
+        return True
 
     def run_transcription():
         # Text of the memo (can be changed by the user)
         text = st.text_area("", memo)
         # run the models
-        run_models(text)
+        return run_models(text)
 
     # Son du Mémo
     st.markdown("""
@@ -187,9 +205,12 @@ elif direction == pages[1]:
         # show button transcription
         if columns[1].button("Transcription du mémo"):
             st.session_state.button_audio2text_pressed = True
-            run_transcription()
+            error_free = run_transcription()
     else:
-        run_transcription()
+        error_free = run_transcription()
+
+    if not error_free:
+        st.error("Oups, quelque chose s'est mal passé. L'API est probablement hors ligne.")
 
 
 # ####################################################################
