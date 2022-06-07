@@ -47,7 +47,8 @@ direction = st.sidebar.radio('', pages)
 ####################################################################
 
 if direction == pages[0]:
-  
+
+    presentation0 = Image.open('images/PresentationPage0.PNG')
     presentation1 = Image.open('images/PresentationPage1.PNG')
     presentation2 = Image.open('images/PresentationPage2.PNG')
     presentation3 = Image.open('images/PresentationPage3.PNG')
@@ -65,12 +66,15 @@ if direction == pages[0]:
     # st.session_state.persisted_variable
 
     if st.session_state.persisted_variable == 0:
+        st.image(presentation0, use_column_width=True)
+
+    if st.session_state.persisted_variable == 1:
         st.image(presentation1, use_column_width=True)
 
-    if st.session_state.persisted_variable == 1 :
+    if st.session_state.persisted_variable == 2 :
         st.image(presentation2, use_column_width=True)
 
-    if st.session_state.persisted_variable == 2 :
+    if st.session_state.persisted_variable == 3 :
         st.image(presentation3, use_column_width=True)
 
 
