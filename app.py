@@ -122,6 +122,18 @@ elif direction == pages[1]:
                 "Location" : "#FFCC99", #hors palette
                 }
 
+        key_translation = {
+            "NGAP" : "code facturation",
+            "location" : "Lieu",
+            "day" : "Jour",
+            "month" : "Mois",
+            "year" : "Année",
+            "day_of_week" : "Jour de la semaine",
+            "day_from_today" : "Jour relatif",
+            "hour" : "Heure",
+            "minute" : "Minutes"
+        }
+
         # identify entities
         predict_url = api_base_url + "predict"
         predict_params = {"sentence" : text}
@@ -161,8 +173,9 @@ elif direction == pages[1]:
         columns_models = st.columns(len(entities))
 
         for i, item in enumerate(entities):
-            if item[1] in endpoints:
-                url_full = api_base_url + endpoints[item[1]]
+            if item[1] not in endpoints:
+                continue
+            url_full = api_base_url + endpoints[item[1]]
             params = {"sentence" : item[0]}
             # api call
             response = requests.get(url_full, params=params)
@@ -174,6 +187,23 @@ elif direction == pages[1]:
                 #columns_models[i].markdown(f"##### {item[0]}")
                 color = colors[item[1]]
                 for key, val in response_api.items():
+
+                    # special treatment for missing values, day of week
+                    # and softmax and sigmoid
+                    # to improve readability
+                    if str(val) == "99":
+                        val = "absent"
+                    elif key == "day_of_week":
+                        val += 1
+                    if key == "sigmoid":
+                        if val < 0.5:
+                            val = 1 - val
+                    if key == "sigmoid" or key == "softmax":
+                        val = f"{int(val * 100)}%"
+                        key = "Confiance"
+                    if key in key_translation:
+                        key = key_translation[key]
+
                     columns_models[i].markdown(
                         f'<p style="background-color: {color}">{key} : {val}</p>',
                         unsafe_allow_html=True)
