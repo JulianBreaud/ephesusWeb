@@ -100,12 +100,17 @@ elif direction == pages[1]:
 
     def run_models(text):
         '''
-        return True is all is well
+        return True if all is well
         return False if there's an error with api calls
         '''
 
         if not st.session_state.api_is_online:
             return False
+
+        if len(text) < 3:
+            # we consider the sentence to be too short
+            # but that's ok, we just don't analyse it
+            return True
 
         st.markdown("### Automatisation de l'analyse du texte")
 
@@ -162,6 +167,11 @@ elif direction == pages[1]:
         # feed entities to the models for treatment, date, time, location
         # list entities
         entities = [(str(ent), ent.label_) for ent in doc.ents]
+
+        if len(entities) == 0:
+            # we didn't detect any entity
+            # but that's ok, we simply stop here
+            return True
 
         endpoints = {
             "Treatment" : "treatment",
