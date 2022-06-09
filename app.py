@@ -264,7 +264,12 @@ elif direction == pages[1]:
 
 elif direction == pages[2]:
 
-    list_fichiers_output = os.listdir('output')
+    try:
+        list_fichiers_output = os.listdir("output")
+    except FileNotFoundError:
+        os.mkdir("output")
+        list_fichiers_output = os.listdir("output")
+
     for fichier in list_fichiers_output:
         os.remove(os.path.join('output', fichier))
 
