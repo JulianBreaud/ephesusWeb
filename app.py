@@ -30,7 +30,7 @@ import base64
 
 st.set_page_config(
             page_title="Projet Ephesus", # => Quick reference - Streamlit
-            page_icon="",#on a choisi le logo standard mais on peut mettre au chose "🐍",
+            page_icon="⚕️",#on a choisi le logo standard mais on peut mettre au chose "🐍",
             layout="wide",
             initial_sidebar_state="auto") # collapsed
 
