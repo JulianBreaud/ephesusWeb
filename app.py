@@ -43,7 +43,7 @@ image = Image.open('images/medical.png')
 st.sidebar.image(image, caption="", use_column_width=False)
 st.sidebar.markdown("")
 
-pages = ('Projet Ephesus', 'Démo', 'Run')#('Projet Ephesus', 'Démo', 'Run', 'Et pour finir')
+pages = ('Projet Ephesus', 'Démo', 'Production')
 direction = st.sidebar.radio('', pages)
 
 ####################################################################
