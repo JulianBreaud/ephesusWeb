@@ -199,8 +199,19 @@ elif direction == pages[1]:
         columns_models = st.columns(len(entities))
 
         for i, item in enumerate(entities):
+            # apply pretty colors
+            color = colors.get(item[1], "#FFFFFF")
+            # for Cotation, simply print it on screen
             if item[1] not in endpoints:
-                continue
+                if item[1] == "Cotation":
+                    key = "Cote"
+                    val = item[0]
+                    columns_models[i].markdown(
+                        f'<p style="background-color: {color}">{key} : {val}</p>',
+                        unsafe_allow_html=True)
+                    continue
+                else:
+                    continue
             url_full = api_base_url + endpoints[item[1]]
             params = {"sentence" : item[0]}
             # api call
@@ -209,9 +220,6 @@ elif direction == pages[1]:
                 response_api = response.json()
 
                 # show api response on screen
-                #columns_models[i].markdown(f"#### {item[1]}")
-                #columns_models[i].markdown(f"##### {item[0]}")
-                color = colors[item[1]]
                 for key, val in response_api.items():
 
                     # special treatment for missing values, day of week
