@@ -142,7 +142,16 @@ elif direction == pages[1]:
             "day_of_week" : "Jour de la semaine",
             "day_from_today" : "Jour relatif",
             "hour" : "Heure",
-            "minute" : "Minutes"
+            "minute" : "Minutes",
+            "CareDuration" : "Durée",
+            "CareDurationType" : "En",
+            "CareEnd" : "Fin"
+        }
+        duration_translation = {
+            "Days" : "jours",
+            "Months" : "mois",
+            "Year" : "an",
+            "Weeks" : "semaines"
         }
 
         # identify entities
@@ -184,6 +193,7 @@ elif direction == pages[1]:
             "Date" : "date",
             "Time" : "time",
             "Location" : "location",
+            "Duration" : "duration"
             }
 
         columns_models = st.columns(len(entities))
@@ -217,6 +227,9 @@ elif direction == pages[1]:
                     if key == "sigmoid" or key == "softmax":
                         val = f"{int(val * 100)}%"
                         key = "Confiance"
+                    if key == "CareDurationType":
+                        if val:
+                            val = duration_translation[val]
                     if key in key_translation:
                         key = key_translation[key]
 
