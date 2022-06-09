@@ -124,13 +124,13 @@ elif direction == pages[1]:
         api_base_url = "https://ephesus-api-3d2vvkkptq-ew.a.run.app/"
 
         colors = {
-                "Treatment" : "#99CCFF",
-                "Cotation" : "#444444", #hors palette
-                "Date" : "#B2E7E8",
-                "Time" : "#8FB9AA",
-                "Duration" : "#F2D096",
-                "Frequency" : "#ED895",
-                "Location" : "#FFCC99", #hors palette
+                "Treatment" : "#FFADAD",
+                "Cotation" : "#FFD6A5",
+                "Date" : "#FDFFB6",
+                "Time" : "#CAFFBF",
+                "Duration" : "#9BF6FF",
+                "Frequency" : "#BDB2FF",
+                "Location" : "#FFC6FF",
                 }
 
         key_translation = {
