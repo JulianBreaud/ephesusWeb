@@ -24,6 +24,10 @@ from spacy.vocab import Vocab
 from spacy.tokens import Doc
 import base64
 
+import ast
+import zipfile
+import time
+
 ####################################################################
 ### SIDEBAR & CONFIG
 ####################################################################
@@ -39,7 +43,7 @@ image = Image.open('images/medical.png')
 st.sidebar.image(image, caption="", use_column_width=False)
 st.sidebar.markdown("")
 
-pages = ('Projet Ephesus', 'Démo')#('Projet Ephesus', 'Démo', 'Run', 'Et pour finir')
+pages = ('Projet Ephesus', 'Démo', 'Production')
 direction = st.sidebar.radio('', pages)
 
 ####################################################################
@@ -76,7 +80,7 @@ if direction == pages[0]:
     if st.session_state.persisted_variable == 3 :
         st.image(presentation3, use_column_width=True)
 
-
+    # Afficher une présentation html
     # html_code = '''
     #    <a target="_blank" href="https://geoffroygit.github.io/ephesus/notebooks/Ephesus.slides.html">
     #    <img src="https://raw.githubusercontent.com/JulianBreaud/ephesusWeb/master/images/fullscreen.png" /></a>
@@ -258,89 +262,74 @@ elif direction == pages[1]:
 # ### on importe l'ensemble des translations et on lance le modèle et on obtient un rapport d'éxécution
 # ####################################################################
 
-# elif direction == pages[2]:
+elif direction == pages[2]:
 
-#     st.markdown("""
-#     # Récupération de plusieurs mémos
+    list_fichiers_output = os.listdir('output')
+    for fichier in list_fichiers_output:
+        os.remove(os.path.join('output', fichier))
 
-#     """)
+    st.markdown("""
+    # Sélectionner un ou plusieurs fichier(s) JSON
+    """)
 
-#     st.markdown("""
-#         ### Partie 1 - Récupération des mémos retranscrits :
-#     """)
+    uploaded_files = st.file_uploader(label="Uniquement des fichiers Translation", accept_multiple_files=True)
 
-#     rep = st.text_input('Les memos sont dans le repertoire :', "raw_data/input_json")
+    st.markdown("""
+                ### Rapport d'exécution :
+                """)
 
-#     LOCAL_PATH =str(rep)
+    bar = st.progress(0)
+    st.write("Nombre de fichiers téléchargés : " + str(len(uploaded_files)))
 
-#     # récupération des noms des fichiers output translation des memos vocaux
-#     fichiers = [fichier for fichier in listdir(LOCAL_PATH) if isfile(join(LOCAL_PATH, fichier))]
+    api_url_all = "https://ephesus-api-3d2vvkkptq-ew.a.run.app/all"
 
-#     data = []
-#     for fichier in fichiers :
-#         lib_fichier = LOCAL_PATH + "/" + fichier
-#         with open(lib_fichier) as mon_fichier:
-#             data.append(json.load(mon_fichier))
+    if len(uploaded_files) > 0 :
 
-#     # récupération seulement de la phrase = sentence du mémo
-#     data = [data[i]["Translation"] for i in range(len(data))]
+        for i_file, uploaded_file in enumerate(uploaded_files):
 
-#     # on écrit une ligne vide pour la présentation
-#     st.write("")
+            bar.progress(int(100*(i_file + 1)/ len(uploaded_files)))
 
-#     if len(data) > 1 :
-#         st.write(f"{len(data)} translations trouvées : ")
-#     else :
-#         st.write(f"{len(data)} translation trouvée : ")
+            bytes_data = uploaded_file.read()
+            fichier = uploaded_file.name
 
-#     for i in range(len(data)) :
-#         st.write(data[i])
+            # check that the file is indeed a json
+            if "_translation.json" not in fichier:
+                continue
 
-#     st.markdown("""
-#         ### Partie 2 - Lancement de l'analyse :
-#     """)
-#     if st.button("GO"):
-#             # print is visible in the server output, not in the page
-#             print('button clicked!')
-#             st.write('Analyse lancée 🎉')
+            cle_fichier = fichier.replace("_translation.json","")
 
-#             # url de l'api
-#             url = 'https://ephesus-api-3d2vvkkptq-ew.a.run.app/test'
+            text_1 = ast.literal_eval(bytes_data.decode("utf-8"))
+            translation = text_1['Translation']
 
-#             st.markdown("""
-#                             ### Partie 3 - Les résultats :
-#                             """)
+            # api call
+            params = {"sentence" : translation}
 
-#             for i in range(len(data)) :
+            response = requests.get(api_url_all, params=params)
+            if response.status_code == 200:
+                response_api = response.json()
 
-#                 params = {
-#                     "sentence" : data[i]
-#                     }
+                fichier_output = "output/" + cle_fichier + "_extraction.json"
 
-#                 # retrieve the response
-#                 response = requests.get(
-#                     url,
-#                     params=params
-#                 )
+                jsonString = json.dumps(response_api)
+                try:
+                    jsonFile = open(fichier_output, "w")
+                except:
+                    continue
 
-#                 st.write('Phrase ' + str(i) + " :")
+                jsonFile.write(jsonString)
+                jsonFile.close()
 
-#                 if response.status_code == 200:
-#                     response_api = response.json().get("entities", "not found")
-#                     response_api = tuple(tuple(i) if type(i)==type([]) else i for i in response_api)
-#                     annotated_text(*response_api)
 
-#                 st.write("")
+        list_fichiers = os.listdir('output')
+        list_fichiers_json = [fichier for fichier in list_fichiers if "_extraction.json" in fichier ]
 
-#             st.markdown("""
-#                         ### Partie 4 - Le rapport d'exécution :
-#                         """)
+        with zipfile.ZipFile("output/json_extraction.zip", mode="w") as archive:
+            for fichier in list_fichiers_json:
+                archive.write("output/" + fichier)
 
-#             col1, col2 = st.columns(2)
-#             col1.metric("Nombre de documents lus", len(data), "")
-#             col2.metric("Taux de reconnaissances", "80%", "")
+        with open('output/json_extraction.zip', 'rb') as f:
+            st.download_button('Download Zip', f, file_name="json_extraction.zip")
 
-#             # rapport d’exécution : le nombre de rejet, taux de détections, de reconnaissance
 
 # ####################################################################
 # ### PAGE 4 - FIN
