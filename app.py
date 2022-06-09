@@ -101,6 +101,8 @@ elif direction == pages[1]:
     if "api_is_online" not in st.session_state:
         error_free = True # we assume the api is online
         st.session_state.api_is_online = error_free
+    else:
+        error_free = st.session_state.api_is_online
 
     def run_models(text):
         '''
