@@ -254,6 +254,10 @@ elif direction == pages[1]:
 
 elif direction == pages[2]:
 
+    list_fichiers_output = os.listdir('output')
+    for fichier in list_fichiers_output:
+        os.remove(os.path.join('output', fichier))
+
     st.markdown("""
     # Sélectionner un ou plusieurs fichier(s) JSON
     """)
@@ -264,72 +268,58 @@ elif direction == pages[2]:
                 ### Rapport d'exécution :
                 """)
 
+    bar = st.progress(0)
     st.write("Nombre de fichiers téléchargés : " + str(len(uploaded_files)))
+
+    api_url_all = "https://ephesus-api-3d2vvkkptq-ew.a.run.app/all"
 
     if len(uploaded_files) > 0 :
 
-        for uploaded_file in uploaded_files:
+        for i_file, uploaded_file in enumerate(uploaded_files):
+
+            bar.progress(int(100*(i_file + 1)/ len(uploaded_files)))
+
             bytes_data = uploaded_file.read()
             fichier = uploaded_file.name
+
+            # check that the file is indeed a json
+            if "_translation.json" not in fichier:
+                continue
+
             cle_fichier = fichier.replace("_translation.json","")
-            cle_fichier
+
             text_1 = ast.literal_eval(bytes_data.decode("utf-8"))
             translation = text_1['Translation']
-            translation
 
-            dict_response_api = {
-                "cle_fichier" : cle_fichier,
-                "translation" : translation
-            }
+            # api call
+            params = {"sentence" : translation}
 
-            fichier_output = "output/" + cle_fichier + "_translation.json"
+            response = requests.get(api_url_all, params=params)
+            if response.status_code == 200:
+                response_api = response.json()
 
-            jsonString = json.dumps(dict_response_api)
-            jsonFile = open(fichier_output, "w")
-            jsonFile.write(jsonString)
-            jsonFile.close()
+                fichier_output = "output/" + cle_fichier + "_extraction.json"
+
+                jsonString = json.dumps(response_api)
+                try:
+                    jsonFile = open(fichier_output, "w")
+                except:
+                    continue
+
+                jsonFile.write(jsonString)
+                jsonFile.close()
 
 
         list_fichiers = os.listdir('output')
-        list_fichiers_json = [fichier for fichier in list_fichiers if "json" in fichier ]
+        list_fichiers_json = [fichier for fichier in list_fichiers if "_extraction.json" in fichier ]
 
-        list_fichiers_json
+        with zipfile.ZipFile("output/json_extraction.zip", mode="w") as archive:
+            for fichier in list_fichiers_json:
+                archive.write("output/" + fichier)
 
-        with zipfile.ZipFile("output/json_output.zip", mode="w") as archive:
-                for fichier in list_fichiers_json:
-                    archive.write("output/" + fichier)
+        with open('output/json_extraction.zip', 'rb') as f:
+            st.download_button('Download Zip', f, file_name="json_extraction.zip")
 
-        with open('output/json_output.zip', 'rb') as f:
-            st.download_button('Download Zip', f)
-
-
-    # # url de l'api
-    # url = 'https://ephesus-api-3d2vvkkptq-ew.a.run.app/test'
-
-    # st.markdown("""
-    #                 ### Partie 3 - Les résultats :
-    #                 """)
-
-    # for i in range(len(data)) :
-
-    #     params = {
-    #         "sentence" : data[i]
-    #         }
-
-    #     # retrieve the response
-    #     response = requests.get(
-    #         url,
-    #         params=params
-    #     )
-
-    #     st.write('Phrase ' + str(i) + " :")
-
-    #     if response.status_code == 200:
-    #         response_api = response.json()
-
-
-
-#             # rapport d’exécution : le nombre de rejet, taux de détections, de reconnaissance
 
 # ####################################################################
 # ### PAGE 4 - FIN
