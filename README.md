@@ -1,74 +1,84 @@
-# Data analysis
-- Document here the project: ephesusWeb
-- Description: Project Description
-- Data Source:
-- Type of analysis:
+# Project Ephesus
 
-Please document the project the better you can.
+Interpret textual data generated from medical vocal memos
 
-# Startup the project
+In the Library of Celsus in Ephesus, built in the 2nd century, there are four statues depicting wisdom (Sophia), knowledge (Episteme), intelligence (Ennoia) and excellence (Arete). Our project is named after this city and the goddess Sophia.
 
-The initial setup.
+# What it's all about
 
-Create virtualenv and install the project:
-```bash
-sudo apt-get install virtualenv python-pip python-dev
-deactivate; virtualenv ~/venv ; source ~/venv/bin/activate ;\
-    pip install pip -U; pip install -r requirements.txt
-```
+After visiting a patient nurses and doctors need to quickly and easily send information
 
-Unittest test:
-```bash
-make clean install test
-```
+So they record a vocal memo after each visit
 
-Check for ephesusWeb in gitlab.com/{group}.
-If your project is not set please add it:
+Today these memos are read by humans and the infos are manually entered in the database
 
-- Create a new project on `gitlab.com/{group}/ephesusWeb`
-- Then populate it:
+We want to ease their work by automatically extracting informations from the vocal memos and pre-filling the informations to be entered in the database
 
-```bash
-##   e.g. if group is "{group}" and project_name is "ephesusWeb"
-git remote add origin git@github.com:{group}/ephesusWeb.git
-git push -u origin master
-git push -u origin --tags
-```
+This repo is the front end demo website for the [Project Ephesus](https://github.com/GeoffroyGit/ephesus/)
 
-Functionnal test with a script:
+# Demo
+
+## Try it yourself
+
+You can play around with our demo [here](https://ephesus-web.herokuapp.com/)
+
+In this demo, we let you try your own sentences and see the results from our models
+
+# Run our code yourself
+
+## Install the Ephesus package
+
+Clone the project:
 
 ```bash
-cd
-mkdir tmp
-cd tmp
-ephesusWeb-run
+git clone git@github.com:JulianBreaud/ephesusWeb.git
 ```
 
-# Install
-
-Go to `https://github.com/{group}/ephesusWeb` to see the project, manage issues,
-setup you ssh public key, ...
+We recommend you to create a fresh virtual environment
 
 Create a python3 virtualenv and activate it:
 
 ```bash
-sudo apt-get install virtualenv python-pip python-dev
-deactivate; virtualenv -ppython3 ~/venv ; source ~/venv/bin/activate
-```
-
-Clone the project and install it:
-
-```bash
-git clone git@github.com:{group}/ephesusWeb.git
 cd ephesusWeb
-pip install -r requirements.txt
-make clean install test                # install and test
+pyenv virtualenv ephesusWeb
+pyenv local ephesusWeb
 ```
-Functionnal test with a script:
+
+Upgrade pip if needed:
 
 ```bash
-cd
-mkdir tmp
-cd tmp
-ephesusWeb-run
+pip install --upgrade pip
 ```
+
+Install the package:
+
+```bash
+pip install -r requirements.txt
+pip install -e .
+```
+
+## Run the website locally
+
+Run the website on your machine:
+
+```bash
+make streamlit
+```
+
+## Run the website on Heroku
+
+Create the app on Heroku:
+
+```bash
+make heroku_create
+```
+
+Deploy and run the website:
+
+```bash
+make heroku_deploy
+```
+
+# You're done
+
+Congratulations!
